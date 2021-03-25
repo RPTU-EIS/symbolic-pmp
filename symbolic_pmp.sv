@@ -1,6 +1,3 @@
-`define LOWER_MEM_BOUND 32'h1C00_8000
-`define UPPER_MEM_BOUND 32'h1C08_2000
-
 //Macros for PMP address and config registers. Insert the hierachycal signal names here:
 `define PMP_CFG_REG top.core1.cs_registers_i.pmp_reg_q.pmpcfg
 `define PMP_ADDR_REG top.core1.cs_registers_i.pmp_reg_q.pmpaddr
