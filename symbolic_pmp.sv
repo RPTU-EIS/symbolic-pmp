@@ -90,7 +90,7 @@ function automatic no_conflicting_entries(logic[3:0] i, logic [2:0] permissions,
 			case (`PMP_CFG_REG[j][4:3])
 				2'b10: //NA4, 4byte region
 					no_conflict = no_conflict & (
-						( `PMP_CFG_REG[j][2:0]	== permissions 		) || 	//same permissions
+						( `PMP_CFG_REG[j][2:0]	== permissions 		) ||	//same permissions
 						( `PMP_ADDR_REG[j] 		<  start_address ||			//address ranges are not overlapping
 						  `PMP_ADDR_REG[j] 		>= end_address		)
 				  	);
@@ -155,9 +155,9 @@ function automatic pmp_entry_config(logic[3:0] i, logic [31:0] address, logic [2
 
 		2'b11: //NAPOT
 		begin
-			logic [15:0] napot_mask 		= get_napot_mask(i);
-			logic [31:0] start_address		= `PMP_ADDR_REG[i] & {16'hFFFF, napot_mask};
-			logic [31:0] end_address		= `PMP_ADDR_REG[i] + get_napot_end(i) + 1;
+			logic [15:0] napot_mask 	= get_napot_mask(i);
+			logic [31:0] start_address	= `PMP_ADDR_REG[i] & {16'hFFFF, napot_mask};
+			logic [31:0] end_address	= `PMP_ADDR_REG[i] + get_napot_end(i) + 1;
 			pmp_entry_config = (
 				no_conflicting_entries(i, permissions, start_address, end_address) &&
 				napot_mask != 0 &&
