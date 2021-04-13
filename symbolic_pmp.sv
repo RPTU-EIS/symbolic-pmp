@@ -90,16 +90,16 @@ function automatic no_conflicting_entries(logic[3:0] i, logic [2:0] permissions,
 			case (`PMP_CFG_REG[j][4:3])
 				2'b10: //NA4, 4byte region
 					no_conflict = no_conflict & (
-						( `PMP_CFG_REG[j][2:0]	== permissions 		) || //same permissions
-						( `PMP_ADDR_REG[j] 	<  start_address ||		 //address ranges are not overlapping
-						  `PMP_ADDR_REG[j] 	>= end_address		)
+						( `PMP_CFG_REG[j][2:0]	== permissions 		) || 	//same permissions
+						( `PMP_ADDR_REG[j] 		<  start_address ||			//address ranges are not overlapping
+						  `PMP_ADDR_REG[j] 		>= end_address		)
 				  	);
 				2'b01: //TOR
 				begin
 					logic [31:0] local_start = (j>0)?`PMP_ADDR_REG[j-1]:32'h0;
 					logic [31:0] local_end   = `PMP_ADDR_REG[j];
 					no_conflict = no_conflict & ( 
-						( `PMP_CFG_REG[j][2:0]	== permissions 			) || 	//same permissions
+						( `PMP_CFG_REG[j][2:0]	== permissions ) || 	//same permissions
 						( local_start < start_address ? local_end < start_address : (local_start > start_address ? local_start >= end_address : 1'b0)	)	//address ranges are not overlapping
 					);
 				end
@@ -110,8 +110,8 @@ function automatic no_conflicting_entries(logic[3:0] i, logic [2:0] permissions,
 					logic [31:0] local_start	= `PMP_ADDR_REG[j] & {16'hFFFF, napot_mask};
 					logic [31:0] local_end		= `PMP_ADDR_REG[j] + get_napot_end(j) + 1;
 					no_conflict = no_conflict & (
-						( `PMP_CFG_REG[j][2:0]	== permissions 				) 	||																											&&
-						( 	napot_mask != 0																												&&
+						( `PMP_CFG_REG[j][2:0]	== permissions ) 	||																											&&
+						( 	napot_mask != 0		&&
 							( local_start < start_address ? local_end < start_address : (local_start > start_address ? local_start >= end_address : 1'b0))
 						)
 					);
@@ -134,23 +134,23 @@ function automatic pmp_entry_config(logic[3:0] i, logic [31:0] address, logic [2
 		2'b10: //NA4, 4byte region
 		begin
 			logic [31:0] start_address	= address >> 2;
-			logic [31:0] end_address		= (address >> 2) + 1; //+1?
+			logic [31:0] end_address	= (address >> 2) + 1; //+1?
 			pmp_entry_config = (
 				no_conflicting_entries(i, permissions, start_address, end_address) &&
-				`PMP_CFG_REG[i]	== {3'b000, 2'b10, permissions} &&
-				`PMP_ADDR_REG[i]		== address >> 2 );
+				`PMP_CFG_REG[i]		== {3'b000, 2'b10, permissions} &&
+				`PMP_ADDR_REG[i]	== address >> 2 );
 		end
 
 		2'b01: //TOR
 		begin
 			logic [31:0] start_address	= (i>0)?`PMP_ADDR_REG[i-1]:32'h0;
-			logic [31:0] end_address		= `PMP_ADDR_REG[i];
+			logic [31:0] end_address	= `PMP_ADDR_REG[i];
 			pmp_entry_config = (
 				no_conflicting_entries(i, permissions, start_address, end_address) &&
 				( (i>0)?(`PMP_CFG_REG[i-1][4:3]	== 2'b00):1'b1 ) &&
-				`PMP_CFG_REG[i] == {3'b000, 2'b01, permissions} &&
+				`PMP_CFG_REG[i] 	== {3'b000, 2'b01, permissions} &&
 				`PMP_ADDR_REG[i-1]	<= address >> 2 &&
-				`PMP_ADDR_REG[i]		>  address >> 2 );
+				`PMP_ADDR_REG[i]	>  address >> 2 );
 		end
 
 		2'b11: //NAPOT
